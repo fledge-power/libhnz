@@ -5,37 +5,42 @@
 #include "../inc/hnz_client.h"
 
 HNZClient::HNZClient() {
-
-    m_pVoie = new VoieHNZ();
-    m_pConn = new TcpConnexion(m_pVoie);
-    m_pVoie->setServer(m_pConn);
-    m_pVoie->setClient(m_pConn);
-
+  m_pVoie = new VoieHNZ();
+  m_pConn = new TcpConnexion(m_pVoie);
+  m_pVoie->setServer(m_pConn);
+  m_pVoie->setClient(m_pConn);
 }
 
 std::thread HNZClient::launchAutomate() {
-    VoieHNZ* taskPtr = m_pVoie;
-    std::thread t(&VoieHNZ::vGereAutomate, taskPtr);
-    return t;
+  VoieHNZ* taskPtr = m_pVoie;
+  std::thread t(&VoieHNZ::vGereAutomate, taskPtr);
+  return t;
 }
 
 void HNZClient::stop() {
+  if (!m_pVoie->stop_flag && started) {
+    m_pVoie->stop_flag = true;
+    // Stopping socket...
+    m_pConn->stop();
+    // Stopping automate
     m_ThreadAutomate.join();
+  }
 }
-
 
 int HNZClient::connect_Server(const char* adresse, int port) {
-    int con_opened = m_pConn->iTCPConnecteClient(adresse, port);
-	/*ERROR HERE (pb de thread -> fiabiliser la vérif d'établissement de 
-	connection et iTCPConnecteClient, pour ne pas lancer l'automate inutilement. 
-	Voir également à couper toute activité antétieure lors d'une 
-	nouvelle conncetion (avec m_client->stop() notamment).*/
-    if (!con_opened && !m_ThreadAutomate.joinable()) {
-        m_ThreadAutomate = launchAutomate();
-    }
-	return con_opened;
+  int con_opened = m_pConn->iTCPConnecteClient(adresse, port);
+  if (!con_opened) {
+    started = true;
+  }
+  /*ERROR HERE (pb de thread -> fiabiliser la vérif d'établissement de
+  connection et iTCPConnecteClient, pour ne pas lancer l'automate inutilement.
+  Voir également à couper toute activité antétieure lors d'une
+  nouvelle conncetion (avec m_client->stop() notamment).*/
+  if (!con_opened && !m_ThreadAutomate.joinable()) {
+    m_ThreadAutomate = launchAutomate();
+  }
+  return con_opened;
 }
-
 
 // void HNZClient::receiveFr() {
 //       while(1) {
@@ -50,72 +55,64 @@ int HNZClient::connect_Server(const char* adresse, int port) {
 // }
 
 unsigned char* HNZClient::receiveData() {
-    bool trameRecue = m_pConn->vAssembleTrame();
-    if (trameRecue) {
-        return (m_pVoie->trDepileTrame()->aubTrame);
-    }
-    return nullptr;
+  bool trameRecue = m_pConn->vAssembleTrame();
+  if (trameRecue) {
+    return (m_pVoie->trDepileTrame()->aubTrame);
+  }
+  return nullptr;
 }
 
 MSG_TRAME* HNZClient::receiveFr() {
-    bool trameRecue = m_pConn->vAssembleTrame();
-    if (trameRecue) {
-        return (m_pVoie->trDepileTrame());
-    }
-    return nullptr;
+  bool trameRecue = m_pConn->vAssembleTrame();
+  if (trameRecue) {
+    return (m_pVoie->trDepileTrame());
+  }
+  return nullptr;
 }
 
-MSG_TRAME* HNZClient::getFr() {
-    return m_pTrameRecu;
+MSG_TRAME* HNZClient::getFr() { return m_pTrameRecu; }
+
+void HNZClient::connect_Server() { m_pConn->iTCPConnecteClient(); }
+
+void HNZClient::addMsgToFr(MSG_TRAME* trame, unsigned char* msg) {
+  memcpy(trame->aubTrame, msg, sizeof(msg) + 1);
+  trame->usLgBuffer = sizeof(msg) + 1;
 }
 
-void HNZClient::connect_Server() {
-    m_pConn->iTCPConnecteClient();
+void HNZClient::addMsgToFr(MSG_TRAME* trame, unsigned char* msg, int msgSize) {
+  memcpy(trame->aubTrame, msg, msgSize);
+  trame->usLgBuffer = msgSize;
 }
 
-
-void HNZClient::addMsgToFr(MSG_TRAME *trame, unsigned char* msg) {
-    memcpy(trame->aubTrame,msg, sizeof(msg)+1);
-    trame->usLgBuffer = sizeof(msg)+1;
-}
-
-void HNZClient::addMsgToFr(MSG_TRAME *trame, unsigned char* msg, int msgSize) {
-    memcpy(trame->aubTrame, msg, msgSize);
-    trame->usLgBuffer = msgSize;
-}
-
-void HNZClient::setCRC(MSG_TRAME *trame) {
-    m_pVoie->vSetCRCMot(trame, POLYNOME_1);
+void HNZClient::setCRC(MSG_TRAME* trame) {
+  m_pVoie->vSetCRCMot(trame, POLYNOME_1);
 }
 
 void HNZClient::createAndSendFr(unsigned char* msg) {
-    MSG_TRAME* pTrame = new MSG_TRAME;
-    addMsgToFr(pTrame,msg);
-    setCRC(pTrame);
-    sendFr(pTrame);
+  MSG_TRAME* pTrame = new MSG_TRAME;
+  addMsgToFr(pTrame, msg);
+  setCRC(pTrame);
+  sendFr(pTrame);
 }
 
-void HNZClient::createAndSendFr(unsigned char addr, unsigned char* msg, int msgSize) {
-    MSG_TRAME* pTrame = new MSG_TRAME;
-    unsigned char msgWithAddr[msgSize + 1];
-    // Add address
-	msgWithAddr[0] = addr; 
-    // Add message
-    memcpy(msgWithAddr+1, msg, msgSize);
-    addMsgToFr(pTrame, msgWithAddr, sizeof(msgWithAddr));
-    setCRC(pTrame);
-    sendFr(pTrame);
+void HNZClient::createAndSendFr(unsigned char addr, unsigned char* msg,
+                                int msgSize) {
+  MSG_TRAME* pTrame = new MSG_TRAME;
+  unsigned char msgWithAddr[msgSize + 1];
+  // Add address
+  msgWithAddr[0] = addr;
+  // Add message
+  memcpy(msgWithAddr + 1, msg, msgSize);
+  addMsgToFr(pTrame, msgWithAddr, sizeof(msgWithAddr));
+  setCRC(pTrame);
+  sendFr(pTrame);
 }
 
-void HNZClient::sendFr(MSG_TRAME* trame){
-    m_pVoie->vEnvoiTrameVersHnz(trame);
-}
+void HNZClient::sendFr(MSG_TRAME* trame) { m_pVoie->vEnvoiTrameVersHnz(trame); }
 
-bool HNZClient::is_connected(){
-    return m_pConn->is_connected();
-}
+bool HNZClient::is_connected() { return m_pConn->is_connected(); }
 
 bool HNZClient::checkCRC(MSG_TRAME* trame) {
-    int dist = m_pVoie->iVerifCRCMot(trame, POLYNOME_1);
-    return (dist == 0);
+  int dist = m_pVoie->iVerifCRCMot(trame, POLYNOME_1);
+  return (dist == 0);
 }

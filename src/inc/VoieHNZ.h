@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/timeb.h>
+#include <atomic>
 #include "hnz_fifo.h"
 #include "TcpConnexion.h"
 #include "../hal/inc/automate.h"
@@ -19,15 +20,21 @@
 #define	POLYNOME_1 0x8408 // Polynome pour calcul CRC
 
 
-#define	SARM					0x0F
-#define	UA						0x63
-#define	RR						0x01
+#define SARM_CODE 0x0F
+#define UA_CODE 0x63
+#define	RR_CODE	0x01
 
-#define TM4                     0x02
-#define TSCE                    0x0B
-#define TSCG                    0x16
-#define TMN                     0x0C
-
+#define TM4_CODE 0x02
+#define TSCE_CODE 0x0B
+#define TSCG_CODE 0x16
+#define TMN_CODE 0x0C
+#define MODULO_CODE 0x0F
+#define TCACK_CODE 0x09
+#define TVCACK_CODE 0x0A
+#define SETTIME_CODE 0x1d
+#define SETDATE_CODE 0x1c
+#define TVC_CODE 0x1A
+#define TC_CODE 0x19
 
 class TcpConnexion;
 class CAutomateHNZ;
@@ -74,6 +81,8 @@ public:
     CAutomate* m_AutomateHNZ;
     int m_uiLus;
     unsigned char m_abBuffer [TAILLE_MAX+TAILLE_ENTETE] ;
+
+    std::atomic<bool> stop_flag;
 
 private:
     bool m_bTransparenceEnCours;
