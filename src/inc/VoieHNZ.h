@@ -18,6 +18,7 @@
 #define LONGUEUR_CRC_MOT 2
 #define EVT_VOIE_TRAME_HNZ 21
 #define	POLYNOME_1 0x8408 // Polynome pour calcul CRC
+#define	DELAI_INTER_TRAME_MS 50
 
 
 #define SARM_CODE 0x0F
