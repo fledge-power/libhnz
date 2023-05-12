@@ -27,8 +27,8 @@ void HNZClient::stop() {
   }
 }
 
-int HNZClient::connect_Server(const char* adresse, int port) {
-  int con_opened = m_pConn->iTCPConnecteClient(adresse, port);
+int HNZClient::connect_Server(const char* adresse, int port, long long int recvTimeoutUs) {
+  int con_opened = m_pConn->iTCPConnecteClient(adresse, port, recvTimeoutUs);
   if (!con_opened) {
     started = true;
   }

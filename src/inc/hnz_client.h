@@ -23,7 +23,7 @@ class HNZClient {
   void sendFr(MSG_TRAME *trame);
   void createAndSendFr(unsigned char *msg);
   void createAndSendFr(unsigned char addr, unsigned char *msg, int msgSize);
-  int connect_Server(const char *adresse, int port);
+  int connect_Server(const char *adresse, int port, long long int recvTimeoutUs);
   void connect_Server();
   void addMsgToFr(MSG_TRAME *trame, unsigned char *msg);
   void addMsgToFr(MSG_TRAME *trame, unsigned char *msg, int msgSize);

@@ -11,6 +11,7 @@
 // port par défaut
 #define PORT 1234
 #define ADRESSE "127.0.0.1"
+#define RECV_TIMEOUT 100000 // 100ms
 
 // portTCP
 
@@ -38,7 +39,7 @@ class TcpConnexion {
   void vSend(unsigned char *m_abBuffer, int buffSize);
   void vRecv();
   int iTCPConnecteClient();
-  int iTCPConnecteClient(const char *adresse, int port);
+  int iTCPConnecteClient(const char *adresse, int port, long long int recvTimeoutUs);
   void iTCPConnecteServeur();
   void iTCPConnecteServeur(int port);
   bool vAssembleTrame();
