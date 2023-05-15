@@ -83,7 +83,13 @@ void TcpConnexion::iTCPConnecteServeur(int port) {
 
 void TcpConnexion::vSend(unsigned char *buffer, int buffSize) {
   // vCSEcriture(true) ;
-  send(socketfd, buffer, buffSize, NULL);
+  // Do not send SIGPIPE in case of broken pipe
+  ssize_t sent = send(socketfd, buffer, buffSize, MSG_NOSIGNAL);
+  if(sent == -1){
+    // Display error if any
+    perror("send:");
+    perror(strerror(errno));
+  }
   // vCSEcriture(false) ;
 }
 
