@@ -1,4 +1,5 @@
 #include "../inc/VoieHNZ.h"
+#include <thread>
 
 VoieHNZ::VoieHNZ() {
   m_bTransparenceEnCours = false;
@@ -81,7 +82,7 @@ void VoieHNZ::vEnvoiTrameVersHnz() {
   connslave->vSend(bTrame, iIndex);
   // printf("Message envoyé : %s\n", bTrame);
 
-  m_AutomateHNZ->vAddTimer(50 /*délai intertrame*/, /*EVT_EMISSION*/ 1, NULL);
+  m_AutomateHNZ->vAddTimer(DELAI_INTER_TRAME_MS, /*EVT_EMISSION*/ 1, NULL);
 
   m_bEmissionRecente = true;
 
@@ -141,6 +142,13 @@ void VoieHNZ::vGereAutomate() {
           break;
       }
     }
+    // Get the time until next timer expiration
+    uint delay = m_AutomateHNZ->uiGetTimeOut();
+    if (delay == 0x7FFFFFF) {
+      // Use 50ms as default delay as this is the minimum time ever set for a new timer
+      delay = DELAI_INTER_TRAME_MS;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds{delay});
   }
 }
 

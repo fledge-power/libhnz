@@ -7,7 +7,7 @@
 
 int main(void) {
   HNZClient* client = new HNZClient();
-  client->connect_Server("127.0.0.1", 6001);
+  client->connect_Server(ADRESSE, 6001, RECV_TIMEOUT);
   // client->connect_Server("192.168.176.134",6001);
   while (1) {
     unsigned char* data = nullptr;

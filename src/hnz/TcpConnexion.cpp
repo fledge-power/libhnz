@@ -5,17 +5,25 @@ TcpConnexion::TcpConnexion() {}
 TcpConnexion::TcpConnexion(VoieHNZ *voie) { m_pVoie = voie; }
 
 int TcpConnexion::iTCPConnecteClient() {
-  iTCPConnecteClient(ADRESSE, PORT);
+  iTCPConnecteClient(ADRESSE, PORT, RECV_TIMEOUT);
   printf("Connexion établie\n");
 }
 
-int TcpConnexion::iTCPConnecteClient(const char *adresse, int port) {
+int TcpConnexion::iTCPConnecteClient(const char *adresse, int port, long long int recvTimeoutUs) {
   struct sockaddr_in serv_addr;
   printf("Adresse de connexion : %s\n", adresse);
 
   if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     printf("\n Socket creation error \n");
     return -1;
+  }
+
+  // Set timeout for recv() calls to avoid busy loop while waiting for messages
+  struct timeval tv;
+  tv.tv_sec = static_cast<time_t>(recvTimeoutUs / 1000000);
+  tv.tv_usec = static_cast<long int>(recvTimeoutUs - (tv.tv_sec * 1000000));
+  if (setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv)) {
+    perror("\n Socket timeout configuration error \n");
   }
 
   serv_addr.sin_family = AF_INET;

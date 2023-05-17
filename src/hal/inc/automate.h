@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <map>
+#include <mutex>
 
 // Action par defaut on ne fait rien
 #define	AUTOMATE_ACTION_ERR		-1
@@ -80,7 +81,7 @@ public:
     void			vKillTimer (int iAction, void* pv) ;
     unsigned int 	uiGetTimeOut();
     bool			bGetNextTimer(int & iAction, void*&pv) ;
-    void			vRazTimers()  { m_aTimers.clear();} ;
+    void			vRazTimers()  { std::lock_guard<std::mutex> lock{m_timerMutex}; m_aTimers.clear();} ;
     int				iGetNbTimers()  ;
 
 
@@ -90,6 +91,7 @@ protected :
     mapETAPES		m_mapEtapes ;
     CEtapeAutomate* m_pEtapeEnCours ;
     aTIMERS			m_aTimers ;
+    std::mutex      m_timerMutex ;
 
 };
 
