@@ -44,13 +44,14 @@ class TcpConnexion {
   void iTCPConnecteServeur(int port);
   bool vAssembleTrame();
   bool is_connected();
-  int stop();
-  int socketfd;
-  VoieHNZ *m_pVoie;
+  void stop();
+  int server_fd = -1;
+  int socketfd = -1;
+  VoieHNZ *m_pVoie = nullptr;
   bool loop = true;
 
  private:
-  CCriticalSection *m_pcsAcces;
+  CCriticalSection *m_pcsAcces = nullptr;
 };
 
 #endif

@@ -19,6 +19,7 @@
 class HNZServer {
  public:
   HNZServer();
+  ~HNZServer();
   void start(int port);
   void start();
   void addMsgToFr(MSG_TRAME* trame, unsigned char* msg);

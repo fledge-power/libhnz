@@ -11,8 +11,15 @@ HNZServer::HNZServer() {
   m_pVoie->setClient(m_pConn);
 }
 
+HNZServer::~HNZServer() {
+  stop();
+  delete m_pVoie;
+  delete m_pConn;
+}
+
 std::thread HNZServer::launchAutomate() {
   VoieHNZ* taskPtr = m_pVoie;
+  m_pVoie->stop_flag = false;
   std::thread t(&VoieHNZ::vGereAutomate, taskPtr);
   return t;
 }
@@ -23,18 +30,24 @@ void HNZServer::stop() {
     // Stopping socket...
     m_pConn->stop();
     // Stopping automate
-    m_ThreadAutomate.join();
+    if (m_ThreadAutomate.joinable()) {
+      m_ThreadAutomate.join();
+    }
   }
 }
 
 void HNZServer::start(int port) {
   m_pConn->iTCPConnecteServeur(port);
-  m_ThreadAutomate = launchAutomate();
+  if (!m_ThreadAutomate.joinable()) {
+    m_ThreadAutomate = launchAutomate();
+  }
 }
 
 void HNZServer::start() {
   m_pConn->iTCPConnecteServeur();
-  m_ThreadAutomate = launchAutomate();
+  if (!m_ThreadAutomate.joinable()) {
+    m_ThreadAutomate = launchAutomate();
+  }
 }
 
 void HNZServer::addMsgToFr(MSG_TRAME* trame, unsigned char* msg) {
