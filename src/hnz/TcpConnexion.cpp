@@ -47,6 +47,7 @@ int TcpConnexion::iTCPConnecteClient(const char *adresse, int port, long long in
     return -1;
   }
   m_is_connected = true;
+  loop = true;
   printf("TcpConnexion::iTCPConnecteClient - Connection established (socket %d)\n", socketfd);
   return 0;
 }
@@ -96,6 +97,7 @@ void TcpConnexion::iTCPConnecteServeur(int port) {
   }
 
   m_is_connected = true;
+  loop = true;
   printf("TcpConnexion::iTCPConnecteServeur - Connection established (socket %d, listen %d)\n", socketfd, server_fd);
 }
 

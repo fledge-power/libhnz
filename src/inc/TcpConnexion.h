@@ -49,7 +49,7 @@ class TcpConnexion {
   int server_fd = -1;
   int socketfd = -1;
   VoieHNZ *m_pVoie = nullptr;
-  bool loop = true;
+  std::atomic<bool> loop{true};
   std::atomic<bool> m_is_connected{false};
 
  private:
