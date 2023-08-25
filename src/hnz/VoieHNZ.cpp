@@ -1,5 +1,8 @@
-#include "../inc/VoieHNZ.h"
 #include <thread>
+#include <sstream>
+#include <iomanip>
+
+#include "../inc/VoieHNZ.h"
 
 VoieHNZ::VoieHNZ() {
   m_bTransparenceEnCours = false;
@@ -47,7 +50,12 @@ void VoieHNZ::vInitEnteteTrameData(MSG_TRAME *pTrame, bool bMaj) {
 ****************************************************************************************/
 void VoieHNZ::vEnvoiTrameVersHnz(MSG_TRAME *pTrame) {
   if (!pTrame) return;
+  // printf("VoieHNZ::vEnvoiTrameVersHnz - socket %d - Frame added to stack [%s]\n", connslave->socketfd, frameToStr(pTrame).c_str());
   m_ffTramesAEnvoyer.bEmpile(pTrame);
+  // Verifie qu'il y a bien un timer en attente, et s'il n'y en a pas, envoie immédiatement
+  if (m_bEmissionRecente && (m_AutomateHNZ->iGetNbTimers() == 0)) {
+    m_bEmissionRecente = false;
+  }
   // Si il n'y a pas eu d'mission rcente, on envoie, sinon, un timer dclenchera
   // l'mission plus tard.
   if (!m_bEmissionRecente) vEnvoiTrameVersHnz();
@@ -59,6 +67,7 @@ void VoieHNZ::vEnvoiTrameVersHnz() {
     m_bEmissionRecente = false;
     return;
   }
+  // printf("VoieHNZ::vEnvoiTrameVersHnz - socket %d - Frame taken from stack [%s]\n", connslave->socketfd, frameToStr(pTrame).c_str());
 
   unsigned char bTrame[2 * TAILLE_MAX];
 
@@ -129,11 +138,14 @@ bool VoieHNZ::bAjouteCar(unsigned char ub) {
 }
 
 void VoieHNZ::vGereAutomate() {
+  printf("VoieHNZ::vGereAutomate - socket %d - Timers management thread started\n", connslave->socketfd);
+
   while (!stop_flag) {
     void *pv;
     int iEvtTimer;
     bool timer = m_AutomateHNZ->bGetNextTimer(iEvtTimer, pv);
     if (timer) {
+      // printf("VoieHNZ::vGereAutomate - socket %d - Processing event of type %d\n", connslave->socketfd, iEvtTimer);
       switch (iEvtTimer) {
         case 1:
           vEnvoiTrameVersHnz();
@@ -145,11 +157,15 @@ void VoieHNZ::vGereAutomate() {
     // Get the time until next timer expiration
     uint delay = m_AutomateHNZ->uiGetTimeOut();
     if (delay == 0x7FFFFFF) {
+      //printf("VoieHNZ::vGereAutomate - socket %d - No timer in list\n", connslave->socketfd);
       // Use 50ms as default delay as this is the minimum time ever set for a new timer
       delay = DELAI_INTER_TRAME_MS;
     }
+    //printf("VoieHNZ::vGereAutomate - socket %d - Waiting for %d ms\n", connslave->socketfd, delay);
     std::this_thread::sleep_for(std::chrono::milliseconds{delay});
   }
+
+  printf("VoieHNZ::vGereAutomate - socket %d - Timers management thread stopped\n", connslave->socketfd);
 }
 
 /*!
@@ -284,3 +300,20 @@ void VoieHNZ::vEmpileTrame(MSG_TRAME *ptrame) {
 }
 
 MSG_TRAME *VoieHNZ::trDepileTrame() { return m_ffTramesRecus.pDepile(); }
+
+/**
+ * Helper method to convert payload into something readable for logs.
+ */
+std::string VoieHNZ::frameToStr(MSG_TRAME *pTrame) {
+  if (pTrame == nullptr) {
+    return "";
+  }
+  int len = pTrame->usLgBuffer;
+  unsigned char* data = pTrame->aubTrame;
+  std::stringstream stream;
+  for (int i = 0; i < len; i++) {
+    stream << std::setfill ('0') << std::setw(2) << std::hex << static_cast<unsigned int>(data[i]);
+    if (i < len - 1) stream << " ";
+  }
+  return stream.str();
+}

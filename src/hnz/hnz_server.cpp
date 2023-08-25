@@ -18,21 +18,20 @@ HNZServer::~HNZServer() {
 }
 
 std::thread HNZServer::launchAutomate() {
-  VoieHNZ* taskPtr = m_pVoie;
   m_pVoie->stop_flag = false;
-  std::thread t(&VoieHNZ::vGereAutomate, taskPtr);
+  std::thread t(&VoieHNZ::vGereAutomate, m_pVoie);
   return t;
 }
 
 void HNZServer::stop() {
   if (!m_pVoie->stop_flag) {
     m_pVoie->stop_flag = true;
-    // Stopping socket...
-    m_pConn->stop();
     // Stopping automate
     if (m_ThreadAutomate.joinable()) {
       m_ThreadAutomate.join();
     }
+    // Stopping socket...
+    m_pConn->stop();
   }
 }
 

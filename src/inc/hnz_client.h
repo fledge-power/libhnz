@@ -39,9 +39,9 @@ class HNZClient {
   std::thread launchAutomate();
 
  private:
-  VoieHNZ *m_pVoie;
-  TcpConnexion *m_pConn;
-  MSG_TRAME *m_pTrameRecu;
+  VoieHNZ *m_pVoie = nullptr;
+  TcpConnexion *m_pConn = nullptr;
+  MSG_TRAME *m_pTrameRecu = nullptr;
   std::thread m_ThreadAutomate;
 };
 

@@ -77,17 +77,19 @@ public:
     void iConnecteSlave();
     void iConnecteMaster();
     void setAutomate(CAutomateHNZ *automate);
-    TcpConnexion* connslave;
-    TcpConnexion* connMaster;
-    CAutomate* m_AutomateHNZ;
-    int m_uiLus;
+    TcpConnexion* connslave = nullptr;
+    TcpConnexion* connMaster = nullptr;
+    CAutomate* m_AutomateHNZ = nullptr;
+    int m_uiLus = 0;
     unsigned char m_abBuffer [TAILLE_MAX+TAILLE_ENTETE] ;
 
     std::atomic<bool> stop_flag;
 
+    static std::string frameToStr(MSG_TRAME *pTrame);
+
 private:
-    bool m_bTransparenceEnCours;
-    bool m_bEmissionRecente;
+    bool m_bTransparenceEnCours = false;
+    bool m_bEmissionRecente = false;
 
 
     CThreadMQ<MSG_TRAME>	m_ffTramesAEnvoyer ;	///< Fifo trames à envoyer

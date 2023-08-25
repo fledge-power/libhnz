@@ -38,9 +38,9 @@ class HNZServer {
   bool isConnected();
 
  private:
-  TcpConnexion* m_pConn;
-  VoieHNZ* m_pVoie;
-  MSG_TRAME* m_pTrameRecu;
+  TcpConnexion* m_pConn = nullptr;
+  VoieHNZ* m_pVoie = nullptr;
+  MSG_TRAME* m_pTrameRecu = nullptr;
   std::thread m_ThreadAutomate;
 };
 
