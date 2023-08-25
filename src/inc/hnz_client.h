@@ -20,6 +20,7 @@
 class HNZClient {
  public:
   HNZClient();
+  ~HNZClient();
   void sendFr(MSG_TRAME *trame);
   void createAndSendFr(unsigned char *msg);
   void createAndSendFr(unsigned char addr, unsigned char *msg, int msgSize);
@@ -38,11 +39,10 @@ class HNZClient {
   std::thread launchAutomate();
 
  private:
-  VoieHNZ *m_pVoie;
-  TcpConnexion *m_pConn;
-  MSG_TRAME *m_pTrameRecu;
+  VoieHNZ *m_pVoie = nullptr;
+  TcpConnexion *m_pConn = nullptr;
+  MSG_TRAME *m_pTrameRecu = nullptr;
   std::thread m_ThreadAutomate;
-  bool started = false;
 };
 
 #endif  // PERSO_HNZ_HNZ_CLIENT_H

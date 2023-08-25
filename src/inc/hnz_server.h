@@ -19,6 +19,7 @@
 class HNZServer {
  public:
   HNZServer();
+  ~HNZServer();
   void start(int port);
   void start();
   void addMsgToFr(MSG_TRAME* trame, unsigned char* msg);
@@ -37,9 +38,9 @@ class HNZServer {
   bool isConnected();
 
  private:
-  TcpConnexion* m_pConn;
-  VoieHNZ* m_pVoie;
-  MSG_TRAME* m_pTrameRecu;
+  TcpConnexion* m_pConn = nullptr;
+  VoieHNZ* m_pVoie = nullptr;
+  MSG_TRAME* m_pTrameRecu = nullptr;
   std::thread m_ThreadAutomate;
 };
 

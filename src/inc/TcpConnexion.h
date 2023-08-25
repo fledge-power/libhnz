@@ -44,13 +44,16 @@ class TcpConnexion {
   void iTCPConnecteServeur(int port);
   bool vAssembleTrame();
   bool is_connected();
-  int stop();
-  int socketfd;
-  VoieHNZ *m_pVoie;
-  bool loop = true;
+  bool check_connection();
+  void stop();
+  int server_fd = -1;
+  int socketfd = -1;
+  VoieHNZ *m_pVoie = nullptr;
+  std::atomic<bool> loop{true};
+  std::atomic<bool> m_is_connected{false};
 
  private:
-  CCriticalSection *m_pcsAcces;
+  CCriticalSection *m_pcsAcces = nullptr;
 };
 
 #endif
