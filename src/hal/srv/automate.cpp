@@ -165,6 +165,7 @@ void CAutomate::vAddTimer(int iDuree , int iAction , void* pv) {
     conf.iDuree	  = iDuree;
     conf.uiTemps  = ui64GetTimerMS() + iDuree ;
 
+    std::lock_guard<std::mutex> lock{m_timerMutex};
     m_aTimers.push_back(conf) ;
 
     // Tri par priorite le + petit au fond
@@ -181,6 +182,7 @@ void CAutomate::vAddTimer(int iDuree , int iAction , void* pv) {
 */
 void CAutomate::vResetTimer(int iAction , void* pv) {
 
+    std::lock_guard<std::mutex> lock{m_timerMutex};
     if (m_aTimers.empty()) return ;
 
     uint64_t uiNow = ui64GetTimerMS();
@@ -194,7 +196,6 @@ void CAutomate::vResetTimer(int iAction , void* pv) {
     // Tri par priorite le + petit au fond
     std::sort(m_aTimers.begin(),m_aTimers.end(),compTimer()) ;
 
-
 }
 
 /*!
@@ -206,6 +207,7 @@ void CAutomate::vResetTimer(int iAction , void* pv) {
 */
 void CAutomate::vKillTimer(int iAction , void* pv) {
 
+    std::lock_guard<std::mutex> lock{m_timerMutex};
     if (m_aTimers.empty()) return ;
 
     // Recherche tous les timers iAction,pv les marque à 0
@@ -237,6 +239,7 @@ void CAutomate::vKillTimer(int iAction , void* pv) {
 */
 uint CAutomate::uiGetTimeOut() {
 
+    std::lock_guard<std::mutex> lock{m_timerMutex};
     if (m_aTimers.empty()) return 0x7FFFFFF ;
 
     uint64_t uiNow = ui64GetTimerMS();
@@ -260,6 +263,7 @@ uint CAutomate::uiGetTimeOut() {
 */
 bool CAutomate::bGetNextTimer(int & iAction, void*&pv) {
 
+    std::lock_guard<std::mutex> lock{m_timerMutex};
     if (m_aTimers.empty()) return false;
 
     uint64_t uiNow = ui64GetTimerMS();
@@ -282,6 +286,7 @@ bool CAutomate::bGetNextTimer(int & iAction, void*&pv) {
 */
 int CAutomate::iGetNbTimers() {
 
+    std::lock_guard<std::mutex> lock{m_timerMutex};
     return m_aTimers.size() ;
 }
 

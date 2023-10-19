@@ -11,33 +11,40 @@ HNZClient::HNZClient() {
   m_pVoie->setClient(m_pConn);
 }
 
+HNZClient::~HNZClient() {
+  stop();
+  delete m_pVoie;
+  delete m_pConn;
+}
+
 std::thread HNZClient::launchAutomate() {
-  VoieHNZ* taskPtr = m_pVoie;
-  std::thread t(&VoieHNZ::vGereAutomate, taskPtr);
+  m_pVoie->stop_flag = false;
+  std::thread t(&VoieHNZ::vGereAutomate, m_pVoie);
   return t;
 }
 
 void HNZClient::stop() {
-  if (!m_pVoie->stop_flag && started) {
+  if (!m_pVoie->stop_flag) {
+    // Mark as stopped
     m_pVoie->stop_flag = true;
+    // Stopping automate
+    if (m_ThreadAutomate.joinable()) {
+      m_ThreadAutomate.join();
+    }
     // Stopping socket...
     m_pConn->stop();
-    // Stopping automate
-    m_ThreadAutomate.join();
   }
 }
 
-int HNZClient::connect_Server(const char* adresse, int port) {
-  int con_opened = m_pConn->iTCPConnecteClient(adresse, port);
-  if (!con_opened) {
-    started = true;
-  }
-  /*ERROR HERE (pb de thread -> fiabiliser la vérif d'établissement de
-  connection et iTCPConnecteClient, pour ne pas lancer l'automate inutilement.
-  Voir également à couper toute activité antétieure lors d'une
-  nouvelle conncetion (avec m_client->stop() notamment).*/
-  if (!con_opened && !m_ThreadAutomate.joinable()) {
-    m_ThreadAutomate = launchAutomate();
+int HNZClient::connect_Server(const char* adresse, int port, long long int recvTimeoutUs) {
+  // If a connection was already established, stop it
+  stop();
+  // Open a new connection
+  int con_opened = m_pConn->iTCPConnecteClient(adresse, port, recvTimeoutUs);
+  if (con_opened == 0) {
+    if (!m_ThreadAutomate.joinable()) {
+      m_ThreadAutomate = launchAutomate();
+    }
   }
   return con_opened;
 }
