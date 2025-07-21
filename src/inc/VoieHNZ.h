@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/timeb.h>
 #include <atomic>
+#include <cstdint>
 #include "hnz_fifo.h"
 #include "TcpConnexion.h"
 #include "../hal/inc/automate.h"
