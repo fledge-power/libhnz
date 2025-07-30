@@ -32,7 +32,7 @@ static char THIS_FILE[]=__FILE__;
    Role       : Fonction pour la gestion  du tri d'un vecteur de confTimer
 ********************************************************************************
 */
-struct compTimer : binary_function<char*, char*, bool> {
+struct compTimer {
     bool operator()(const confTIMER &rpStart, const confTIMER &rpEnd) const
     {return rpStart.uiTemps > rpEnd.uiTemps; }
 };

@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <cstdint>
 
 // Action par defaut on ne fait rien
 #define	AUTOMATE_ACTION_ERR		-1
