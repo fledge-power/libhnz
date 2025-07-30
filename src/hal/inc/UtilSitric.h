@@ -19,6 +19,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cstdint>
 using namespace std;
 // Fin STL
 
