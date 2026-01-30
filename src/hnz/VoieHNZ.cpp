@@ -95,7 +95,7 @@ void VoieHNZ::vEnvoiTrameVersHnz() {
 
   m_bEmissionRecente = true;
 
-  // delete(pTrame);
+  delete(pTrame);
 }
 
 /*!
