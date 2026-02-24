@@ -60,6 +60,7 @@ class VoieHNZ {
 
 public:
     VoieHNZ();
+    ~VoieHNZ();
     int iConnecte();
     MSG_TRAME* creerTrame();
     void vInitEnteteTrameData( MSG_TRAME *pTrame, bool bMaj );
