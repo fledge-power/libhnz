@@ -24,16 +24,14 @@ std::thread HNZClient::launchAutomate() {
 }
 
 void HNZClient::stop() {
-  if (!m_pVoie->stop_flag) {
-    // Mark as stopped
-    m_pVoie->stop_flag = true;
-    // Stopping automate
-    if (m_ThreadAutomate.joinable()) {
-      m_ThreadAutomate.join();
-    }
-    // Stopping socket...
-    m_pConn->stop();
+  // Mark as stopped
+  m_pVoie->stop_flag = true;
+  // Stopping automate
+  if (m_ThreadAutomate.joinable()) {
+    m_ThreadAutomate.join();
   }
+  // Stopping socket...
+  m_pConn->stop();
 }
 
 int HNZClient::connect_Server(const char* adresse, int port, long long int recvTimeoutUs) {

@@ -11,6 +11,11 @@ VoieHNZ::VoieHNZ() {
   stop_flag = false;
 }
 
+VoieHNZ::~VoieHNZ() {
+  if (m_AutomateHNZ != nullptr)
+    delete m_AutomateHNZ;
+}
+
 void VoieHNZ::iConnecteSlave() {
   // Si on a une classe d'attente associe, c'est elle qui fait le CONNECT
   // (ESCLAVE)
@@ -95,7 +100,7 @@ void VoieHNZ::vEnvoiTrameVersHnz() {
 
   m_bEmissionRecente = true;
 
-  // delete(pTrame);
+  delete(pTrame);
 }
 
 /*!

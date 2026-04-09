@@ -39,11 +39,15 @@ int TcpConnexion::iTCPConnecteClient(const char *adresse, int port, long long in
   // Convert IPv4 and IPv6 addresses from text to binary form
   if (inet_pton(AF_INET, adresse, &serv_addr.sin_addr) <= 0) {
     printf("TcpConnexion::iTCPConnecteClient - Error in inet_pton: %s\n", strerror(errno));
+    close(socketfd);
+    socketfd = -1;
     return -1;
   }
 
   if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     printf("TcpConnexion::iTCPConnecteClient - Error in connect: %s\n", strerror(errno));
+    close(socketfd);
+    socketfd = -1;
     return -1;
   }
   m_is_connected = true;
